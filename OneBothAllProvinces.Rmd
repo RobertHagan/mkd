@@ -1,0 +1,124 @@
+---
+title: "oneBothAllProvinces"
+author: "Robert Hagan"
+date: "Wednesday, December 10, 2014"
+output: word_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+setwd("D:/TB_Evaluation/DataWorkArea/DataTable1")
+library(reshape2)
+library(reshape)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(dplyr)
+library(ggthemes)
+library(sjPlot)
+library(plyr)
+library(scales)
+library(foreign)
+#library(xlsx)
+library(GGally)
+library(grid)
+library(vcd)
+library(ggmap)
+
+#library(pander)
+par(oma=c(3,3,3,3)) # all sides have 3 lines of space
+
+oneBoth <- read.csv("oneBoth.csv", header = TRUE)
+# remove Provinces with incomplete data Sari_pul an
+oneBoth <- subset(oneBoth, oneBoth$Province != "Sari_pul")
+oneBoth <- subset(oneBoth, oneBoth$Province != "Nuristann")
+
+# Rename TB-CARE-I to TB_CARE
+oneBoth$effect <- ifelse(oneBoth$effect == "TB-CARE-I", "TB_CARE", "prior")
+#
+# To Do.. calculate means by sequence number to plot. for NSSP, etc
+oneBoth$ProvEffect <- interaction(oneBoth$TBCAREprovYN, oneBoth$effect)
+#head(oneBoth$ProvEffect)
+#table(oneBoth$ProvEffect)
+############# Above is interaction
+```
+
+You can also embed plots, for example:
+
+```{r, echo = FALSE, warnings = FALSE}
+#detach(one)
+#attach(oneBoth)
+artest <- ggplot(oneBoth, aes(sequence, NSSPcases)) 
+artest <- artest + geom_point(aes(colour = effect), size = 1)
+artest <- artest + geom_smooth(aes(group = effect), method = "lm")
+artest <- artest + facet_grid(Province ~ effect, margins = TRUE) # change "effect" to TRUE
+#rtest <- rtest + ggtitle("Trend lines for NSSP cases by Province prior and during TB-CARE I")
+#rtest <- rtest + grid.text(Source: MSH/NTP)
+artest <- artest + coord_flip()
+artest <- artest + theme_gray(base_size = 8)
+artest <- artest + xlab("Quarters from 2008 to 2014 2nd Quarter")
+artest <- artest + theme(legend.position="none") #guides(fill = FALSE)
+```
+
+```{r, echo=FALSE, fig.width=6.25, fig.height=17.5, fig.cap="Flipped Figure 5: NSSP by quarter prior to and after start of TB-CARE", message=FALSE, warnings = FALSE}
+artest  
+```
+```{r, echo=TRUE}
+breaks <- c(25, 100, 500, 1000)
+p <- ggplot(oneBoth, aes(x = ProvEffect, y = AllCases))
+p <- p + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "red",  # was effect then TBCAREprovYN
+                      outlier.size = 2)
+p <- p + facet_grid(TBCAREprovYN ~ ., labeller = label_both, drop = TRUE) # was  TBCAREprovYN) and effect
+p <- p + coord_trans(y = "log10")
+p <- p + coord_flip()
+p <- p + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+p <- p + ggtitle("Quarterly average NEW Suspect TB Cases")
+p <- p + ylab("log10 of average number of new cases of TB per Group per Quarter")
+#p <- p + annotate("text", label = "Source: Quarterly Provincial TB Reports
+#                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+#                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.6, y = 12, size = 3)
+p <- p + theme_gray(base_size = 8)
+#p <- p + theme(legend.position= "none") # was c(.10, .85)) #"bottom")
+p <- p + theme(legend.position= c(.10, .10))
+```
+
+```{r, echo=FALSE, fig.width=6.25, fig.height=4.5}
+p
+```
+
+```{r, echo=TRUE}
+#breaks <- c(25, 100, 500, 1000)
+breaks <- c(50, 100, 200)
+p <- ggplot(oneBoth, aes(x = ProvEffect, y = NSSPcases))
+p <- p + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "red",  # was effect then TBCAREprovYN
+                      outlier.size = 2)
+p <- p + facet_grid(TBCAREprovYN ~ ., labeller = label_both, drop = TRUE) # was  TBCAREprovYN) and effect
+p <- p + coord_trans(y = "log10")
+p <- p + coord_flip()
+p <- p + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+p <- p + ggtitle("Quarterly Provincial average NSSP TB Casee")
+p <- p + ylab("log10 of average number of NSSP cases of TB per Province per Quarter")
+#p <- p + annotate("text", label = "Source: Quarterly Provincial TB Reports
+#                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+#                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.6, y = 12, size = 3)
+p <- p + theme_gray(base_size = 8)
+#p <- p + theme(legend.position= "none") # was c(.10, .85)) #"bottom")
+p <- p + theme(legend.position= c(.10, .10))
+```
+
+```{r, echo=FALSE, fig.width=6.25, fig.height=4.5}
+p
+```
+
+
+
+
+
+
+
+
+#  Add numbers as annotations and use this for NSSP and TSR
+

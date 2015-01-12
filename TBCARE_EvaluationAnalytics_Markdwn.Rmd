@@ -1,0 +1,672 @@
+---
+title: 'ANNEX V: METHODOLOGY DESCRIPTION and NOTES'
+output:
+   word_document:
+     fig_caption: true
+---
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+#rm(list = ls())     # clear objects  
+#raphics.off()      # close graphics windows
+rm(list=ls())
+setwd("D:/TB_Evaluation/DataWorkArea/DataTable1")
+library(reshape2)
+library(reshape)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(dplyr)
+library(ggthemes)
+library(sjPlot)
+library(plyr)
+library(scales)
+library(foreign)
+#library(xlsx)
+library(GGally)
+library(grid)
+library(vcd)
+library(ggmap)
+
+#library(pander)
+par(oma=c(3,3,3,3)) # all sides have 3 lines of space
+#par(oma=c(5,4,4,2)) 
+#par(omi=c(1,1,1,1)) # alternative, uncomment this and comment the previous line to try 
+# - The default size is c(5,4,4,2) + 0.1, (equivalent to c(5.1,4.1,4.1,2.1))
+#
+#sessionInfo()
+
+oneBoth <- read.csv("oneBoth.csv", header = TRUE)
+# remove Provinces with incomplete data Sari_pul an
+oneBoth <- subset(oneBoth, oneBoth$Province != "Sari_pul")
+oneBoth <- subset(oneBoth, oneBoth$Province != "Nuristann")
+
+# Rename TB-CARE-I to TB_CARE
+oneBoth$effect <- ifelse(oneBoth$effect == "TB-CARE-I", "TB_CARE", "prior")
+#
+# To Do.. calculate means by sequence number to plot. for NSSP, etc
+oneBoth$ProvEffect <- interaction(oneBoth$TBCAREprovYN, oneBoth$effect)
+#head(oneBoth$ProvEffect)
+#table(oneBoth$ProvEffect)
+############# Above is interaction
+
+# attach oneBoth
+
+```
+## Introduction
+The evaluation team paid field and office consultation visits to national, provincial, district and health facility directors during the last part of November and early December.  National and international authorities were consulted.  Discussions centered on the past successes, failures, challenges and the future prospects of TB CARE. This information is detailed in the attached summary notes (Annex VII) for each such consultation.  Notes on important statements and observations are provided in the Findings section of the report.
+
+Available data was obtained from the TB CARE I project implementation office.  Although the available data sets did not include Quarter Three of 2014, ner complete data from 2008 through Quarter Two of 2014 data sets were provided. MSH provided data in MS-EXCEL format with a tabbed table for each province. These MS-EXCEL tables were consolidated into two open source comma separated values file (CSV). 
+
+*It is important to emphasize that the robustness of following tables and conclusions can be significantly increased with the inclusion of tardy data for Q3, 2014.*
+
+### Data Sets employed for the evaluation of TB CARE I
+
+The following tables present a snapshot of the three data sets utilized for this report.
+
+####1. Reports of consultations with national, provincial, district and clinic level TB officials.
+
+Approximately 40 invividuals representing approximately 30 institutions and TB activities were interview and consulted for information on their relationship with the TB CARE I project, their insights on the success and failures of this project and their suggestions for improvements if the project were to continue.  Highlights of these discussions are contained in Annex VII.  Annex VII serves as the source documents for information reported in the Findings, Conculsions and Recommendations sections of the report. 
+
+####2. Number of New Cases, New Sputum Smear Positive Cases and the Treatment Success Rate by Prvince and Quarter from 2008 to Q3, 2014
+
+The following list the variables and first row values of this data set.
+
+```{r, echo=FALSE, warnings = FALSE}
+head(oneBoth,1)
+```
+####3. Clinic level New Sputum Smear Positive Cases by Gender and Age for Quarter Two, 2014
+
+The listings below present the first row of this second data set with variable names and values for individual clinics for Quarter 2, 2014 only.
+```{r, echo=FALSE, warning=FALSE}
+setwd("D:/TB_Evaluation/DataWorkArea")
+three <- read.csv("ThreeNSSPAge.csv", header = TRUE)
+head(three[1:5],1)
+head(three[6:12],1)
+head(three[13:20],1)
+head(three[21:25],1)
+setwd("D:/TB_Evaluation/DataWorkArea/DataTable1") # reset back to oneBoth
+
+```
+
+###Tools for Data Analysis
+
+An open source statistical analysis package was employed for the following analysis.  The statistical software package and libraries titled "R" published by the "r-cran-project" were utilized.  The employed code is listed along with the resulting analytical outputs.
+
+##New Suspect Cases, NSSP cases and Treatment Success Rates
+
+####Semiannual sum of new suspected cases and NSSP cases for all prvinces before and after TBCARE
+
+The following two charts present evdence of TB CARE producing measurable increase in both new suspect cases and NSSP cases compared to the performance of non-TB provinces after the implementation of TB CARE.  The dashed trend lines for suspect cases in TB CARE provinces show a significantly higher increasing trend after teh implementation of TB CARE 
+
+```{r, echo=FALSE, message=FALSE}
+oneBoth$sixdec <- ifelse(oneBoth$Quarter %in% c("Q1","Q2"), 0.0, 0.5)
+oneBoth$yearsixdec <- oneBoth$Year + oneBoth$sixdec
+oneBoth$yearsixdec <- as.factor(oneBoth$yearsixdec)
+# plot of AllCases
+sixmonthsAllCases <- aggregate(oneBoth$AllCases, oneBoth[c("TBCAREprovYN", "yearsixdec")],
+                               sum, rm.na = TRUE)
+yqa <- ggplot(sixmonthsAllCases, aes(x= yearsixdec, y = x, group = TBCAREprovYN, colour = TBCAREprovYN))
+yqa <- yqa + geom_line(aes(colour = TBCAREprovYN)) #, size = 1))
+yqa <- yqa + geom_smooth(size = 3, alpha = 0.2, aes(fill = TBCAREprovYN), linetype = "dotted")
+yqa <- yqa + ggtitle("Semi-Annual sum of All Suspect Cases for TBCARE and Non-TBCARE Provinces")
+yqa <- yqa + ylab("Sum of All Suspect Cases per six month time period")
+yqa <- yqa + xlab("Six month time intervals 2008 to Q2, 2014 inclusive")
+#rp <- rp + annotate("text", label = "Source: Quarterly Provincial TB Reports
+#                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+#                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.5, y = 10, size = 3)
+yqa <- yqa + theme_gray(base_size = 10)
+yqa <- yqa + theme(legend.position= c(.08, .85)) #"bottom")
+yqa <- yqa + geom_vline(xintercept = 8)
+yqa <- yqa + annotate("text", label = "Prior\nto\nTB CARE I", size = 3, x = 4, y = 10000, color = "black")
+yqa <- yqa + annotate("text", label = "After\nstart of\nTB CARE I",
+                      size = 3, x = 10, y = 10000, color = "black")
+#
+# plot of NSSP
+sixmonthsNSSP <- aggregate(oneBoth$NSSPcases, oneBoth[c("TBCAREprovYN", "yearsixdec")],
+                           sum, rm.na = TRUE)
+yqn <- ggplot(sixmonthsNSSP, aes(x= yearsixdec, y = x, group = TBCAREprovYN, colour = TBCAREprovYN))
+yqn <- yqn + geom_line(aes(colour = TBCAREprovYN)) #, size = 1))
+yqn <- yqn + geom_smooth(size = 3, alpha = 0.2, aes(fill = TBCAREprovYN), linetype = "dotted")
+yqn <- yqn + ggtitle("Semi-Annual sum of NSSP cases for TBCARE and Non-TBCARE Provinces")
+yqn <- yqn + ylab("Sum of NSSP Cases per six month time period")
+yqn <- yqn + xlab("Six month time intervals 2008 to Q2, 2014 inclusive")
+#rp <- rp + annotate("text", label = "Source: Quarterly Provincial TB Reports
+#                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+#                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.5, y = 10, size = 3)
+yqn <- yqn + theme_gray(base_size = 10)
+yqn <- yqn + theme(legend.position= c(.08, .85)) #"bottom")
+yqn <- yqn + geom_vline(xintercept = 8)
+yqn <- yqn + annotate("text", label = "Prior\nto\nTB CARE I", size = 3, x = 4, y = 4500, color = "black")
+yqn <- yqn + annotate("text",
+                      label = "After\nstart of\nTB CARE I", size = 3, x = 10, y = 4500, color = "black")
+par(mfrow=c(2,1))
+```
+
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height = 9, fig.cap = "AllCases and NSSP",message=FALSE, warning=FALSE }
+grid.arrange(yqa, yqn, ncol = 1,
+             main = "Semi-Annual sum of AllCases and NSSP cases
+             by TB CARE and non-TB CARE Provinces before/after the start of TB CARE")
+#jpeg(file = "Semi-Annual sum of AllCases and NSSP cases by TB CARE and non-TB CARE Provinces.jpeg",
+#     units = "in", width = 6.5, height = 9.0, res = 300)
+#png(file = "Semi-Annual sum of AllCases and NSSP cases by TB CARE and non-TB CARE Provinces.png",
+#     units = "in", width = 6.5, height = 9.0, res = 300)
+dev.off()
+par(mfrow=c(1,1))
+```
+####Box Plots of Quarterly Indicators of TB Program Success for TB CARE and non-TB Care Provinces before and after the implementation of TB CARE
+
+
+The following chart presents summary measures of new suspect cases, NSSP cases and the Treatment Success Rates (TSR) for each quarter during the indicated time periods.  Overall, the improvement in indicators for TB Care I provinces compared to that of non-TB CARE provinces does not appear highly significant.  However, there *has* been a positive increase in all three indicators for TB Care provinces with no increase during the implementation of TB CARE in the non-TB CARE provinces.  Aside from changes in median values, it is important to also notice the very *significant* reduction in the variability of quarterly indicators for TB CARE provinces during the implementation of TB CARE I.  This reduction in variability can be attributed to higher levels of uniformity in supervision, training and monitoring.
+
+In summary, although there has an unimpressive increase in indicator values for TB CARE Provinces during the implementation of TB CARE compared to that demonstrated by non-TB CARE Provinces, TB CARE Provinces now demonstrate a tighter grouping of indicators that are a reflection of consistency, more uniform management practices and higher levels of supervision.  
+
+For possible future efforts, it will be much easier to improve a consistent process than the process in Non-TB CARE provinces which continue to have a high number of outlier data points.
+
+```{r, echo = FALSE, message=FALSE}
+attach(oneBoth)#
+#
+
+
+################################################################
+#par(mfrow=c(1,1))
+#  Originals copied to bottom of this file
+# use grid and gridExtra with grid.arrange to pring 3 plots on one page
+#########################################################################  USE
+## box plots All Cases  USE THIS
+# First of Three  AllCases
+breaks <- c(100, 500, 1000)
+#MIX <- 
+p <- ggplot(oneBoth, aes(x = TBCAREprovYN, AllCases))
+p <- p + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "black",
+                      outlier.size = 2)
+p <- p + coord_trans(y = "log10")
+p <- p + coord_flip()
+p <- p + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+p <- p + ggtitle("Quarterly average NEW Suspect TB Cases")
+p <- p + ylab("log10 of average number of new cases of TB per Group per Quarter")
+p <- p + annotate("text", label = "Source: Quarterly Provincial TB Reports
+                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.6, y = 12, size = 3)
+p <- p + theme_gray(base_size = 10)
+p <- p + theme(legend.position= "none") # was c(.10, .85)) #"bottom")
+#p
+#  Add numbers as annotations and use this for NSSP and TSR
+#################################################################
+# Second of Three
+# box plots NSSP Cases  USE THIS
+breaks <- c(50, 100, 200)
+qp <- ggplot(oneBoth, aes(x = TBCAREprovYN, NSSPcases))
+qp <- qp + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "black",
+                      outlier.size = 2)
+qp <- qp + coord_trans(y = "log10")
+qp <- qp + coord_flip()
+qp <- qp + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+qp <- qp + ggtitle("Quarterly average NSSP TB Cases")
+qp <- qp + ylab("log10 of average number of NSSP cases of TB per Group per Quarter")
+#qp <- qp + annotate("text", label = "Source: Quarterly Provincial TB Reports
+#                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+#                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.5, y = 10, size = 3)
+qp <- qp + theme_gray(base_size = 10)
+qp <- qp + theme(legend.position= "none") # was c(.10, .85)) #"bottom")
+## use geom_text to annotate wiht numbers and use this#
+########### Third plot of Three
+##  Box plot of TSR by before and after TBCARE for TBCARE and NON-TBCARE Provinces
+breaks <- c(30, 60, 90)
+#MIX <- 
+rp <- ggplot(oneBoth, aes(x = TBCAREprovYN, TSR))
+rp <- rp + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "black",
+                      outlier.size = 2)
+#p <- p + coord_trans(y = "log10")
+rp <- rp + coord_flip()
+#p <- p + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+rp <- rp + ggtitle("Quarterly average Treatment Success Rate --TSR")
+rp <- rp + ylab("Average Provincial TSR Group per Quarter")
+#rp <- rp + annotate("text", label = "Source: Quarterly Provincial TB Reports
+#                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+#                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 1.5, y = 10, size = 3)
+rp <- rp + theme_gray(base_size = 10)
+rp <- rp + theme(legend.position= c(.10, .65)) #"bottom")
+######################################################USE annotate and USE ######################
+#SAVE as three plots in one column
+#par(mfrow=c(3,1))
+```
+```{r, echo=FALSE, fig.width= 6.5, fig.height = 9, fig.cap = "Figure 2: Box Plots of Quarterly Indicators", warning=FALSE }
+grid.arrange(p, qp, rp, ncol = 1,
+   main = "Indicators of TB Program Success for TB CARE and non-TB CARE Provinces
+             before and after the implementation of TB CARE")
+```
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+#jpeg(file = "TB_Indicators_for_TBCARE_and_non-TBCARE_Provinces_beforeAndAfter_implementation_of_TBCARE",
+#     units = "in", width = 6.5, height = 9.0, res = 300)
+#grid.arrange(p, qp, rp, ncol = 1,
+#                   main = "Indicators of TB Program Success for TB CARE and Non-TB CARE Provinces
+#             before and after the implementation of TB CARE")
+#dev.off()
+#   TRY PNG
+#png(file = "TB_Indicators_for_TBCARE_and_non-TBCARE_Provinces_beforeAndAfter_implementation_of_TBCARE.png",
+#    units = "in", width = 6.5, height = 9.0, res = 300)
+#grid.arrange(p, qp, rp, ncol = 1,
+#             main = " Indicators of TB Program Success for TB CARE and Non-TB CARE Provinces
+#             before and after the implementation of TB CARE")
+#dev.off()
+```
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+detach(oneBoth)  # clean work area
+rm(list = ls())
+#################### nEW wORK aREA
+#reload packages
+library(reshape2)
+library(reshape)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(dplyr)
+library(ggthemes)
+library(sjPlot)
+library(plyr)
+library(scales)
+library(foreign)
+#library(xlsx)
+library(GGally)
+library(grid)
+library(vcd)
+library(ggmap)
+#library(pander)
+par(oma=c(3,3,3,3)) # all sides have 3 lines of space
+#
+setwd("D:/TB_Evaluation/DataWorkArea")
+# - The default size is c(5,4,4,2) + 0.1, (equivalent to c(5.1,4.1,4.1,2.1))
+#
+#sessionInfo()
+one <- read.csv("onecsv.csv", header = TRUE)
+attach(one)
+#
+# Rename TB-CARE-I to TB_CARE
+one$effect <- ifelse(one$effect == "TB-CARE-I", "TB_CARE", "prior")
+# Make two data sets.. urban and cb
+urban_dots <- subset(one, one$Province == "Kabul")
+cb_dots <- subset(one, one$Province != "Kabul")
+# means by effect for urban_dots and for cb_dots
+# urban dots before and after
+urban <- by(urban_dots[4:5], urban_dots$effect, colMeans)
+# community based before and after
+cb <- by(cb_dots[4:5], cb_dots$effect, colMeans)
+detach(one)
+# Three data set
+three <- read.csv("ThreeNSSPAge.csv", header = TRUE)
+attach(three)
+#three$Allmales <- M0_4 + M5_14 + M15_24 + M25_34 + M35_44 + M45_54 + M55_64 + M65up
+#three$Allfemales <- F0_4 + F5_14 + F15_24 + F25_34 + F35_44 + F45_54 + F55_64 + F65up
+#
+TBCARE_Provinces <- c("BADAKHSHAN", "BAGHLAN", "BAMYAN", "FARYAB", "GHAZNI", "HIRAT", "JAWZJAN",
+                      "KABUL", "KANDAHAR", "KHOST", "PAKTIKA", "PAKTYA", "TAKHAR")
+three$TBCAREyn <- ifelse(three$Province %in% TBCARE_Provinces, "TB_CARE",
+    "Not_TB_CARE")
+#
+testfn = function(x) c(mean=mean(x, na.rm = TRUE))
+#  m added for mean males and mean females per age group
+mmales = apply(three[c(7, 9, 11, 13, 15, 17, 19, 21)], 2, testfn) # this works
+mfemales = apply(three[c(8, 10, 12, 14, 16, 18, 20, 22)],2, testfn)
+#
+dfmfemales <- as.data.frame(mfemales)
+dfmmales <- as.data.frame(mmales)
+mf <- cbind(dfmmales, dfmfemales)
+#
+agegroups <- c("Age 0_4", "5_14","15_24","25_34","35_44","45_54","55_64","65up")
+agegroups <- factor(agegroups, levels = c("Age 0_4", "5_14","15_24","25_34","35_44","45_54","55_64","65up"),
+                    ordered = TRUE)
+attach(three)
+```
+
+
+#####For Urban-DOTS (i.e. Kabul only)
+```{r, echo=FALSE, warning=FALSE}
+attach(one)
+with(urban_dots, t.test(NSSPcases ~ effect))  
+```
+
+There is a significant difference between average quarterly number of NSSP cases in Kabul for the time periods prior to and after the implementation of TB CARE I.  This difference can be considered significant.
+
+```{r, echo=FALSE, warning=FALSE}
+urbantest <- ggplot(urban_dots, aes(sequence, NSSPcases))
+urbantest <- urbantest + ggtitle("Trend lines for NSSP cases by KABUL by Quarter")
+urbantest <- urbantest + xlab("Quarters from 2008 to 2014 2nd Quarter")
+urbantest <- urbantest + geom_point(aes(colour = effect), size = 4)
+urbantest <- urbantest + geom_smooth(aes(group = effect), method = "lm")
+urbantest <- urbantest + theme_gray(base_size = 10)
+```
+The Plot below presents reported New Sputum Smear Positive Cases in Kabul by quarter from 2008 to the second quarter, 2014.
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height = 6, fig.cap = "Figure 3: Kabul Only", warning=FALSE }
+urbantest
+```
+
+Similarly, for all reported new suspect TB cases in Kabul we have:
+
+```{r, echo=TRUE, warning=FALSE}
+with(urban_dots, t.test(AllCases ~ effect))
+```
+The above t-test indicates that there has been a significant increase in All New Suspect TB CASES and in the number of New Sputum Smear Positive Cases as noted above.  The quarterly average number of new suspect cases has increased from 582.6 to 873.5. and the average number of NSSP cases per quarter has increased from 234.7 to 293.5
+
+```{r, echo=TRUE, warning=FALSE}
+with(urban_dots, t.test(NSSPcases ~ effect))
+```
+As with All New Suspect Cases, the average number of NSSP cases per quarter has significantly increased.  The quarterly average rate in Kabul under URBAN-DOTS has increased from 234.7 to 293.5.
+
+####Community Based-DOTS
+
+The data sets for Community Based Dots include all TB CARE Provinces with the exception of Kabul
+
+#####NSSP
+
+```{r, echo = FALSE, warning=FALSE}
+cbtest <- ggplot(cb_dots, aes(sequence, NSSPcases))
+cbtest <- cbtest + ggtitle("Figure 2: Trend lines for NSSP cases 
+                           for CB-DOTS Provinces ONLY by Quarter")
+cbtest <- cbtest + xlab("Quarters from 2008 to 2014 2nd Quarter")
+cbtest <- cbtest + geom_point(aes(colour = effect), size = 4)
+cbtest <- cbtest + geom_smooth(aes(group = effect), method = "lm")
+cbtest <- cbtest + theme_gray(base_size = 10)
+```
+
+The following plot by itself does not encourage a conclusion of increased NSSP cases in Community Based Dots programs during the time frame of TB CARE.  
+```{r, echo=FALSE, fig.width = 6.75, fig.width= 6, fig.cap ="Figure 4: CB-DOTS", warning=FALSE}
+cbtest
+with(cb_dots, t.test(NSSPcases ~ effect)) # Not significant
+```
+
+#####All New Suspect Cases (All Cases)
+
+```{r, echo=FALSE, warning=FALSE}
+with(cb_dots, t.test(AllCases ~ effect))
+```
+Although there has been remarkable success with Community Based DOTS in some provinces, on aggregate, evidence of success is limited.  However and will be presented later, increased treatment success rates and the increase in the number of provinces with a positive growth trend in case detection are very positive signs.  CB-DOTS based suspect case identification at the project level shows a positive trend. The average quarterly number of NSSP cases increased from 122.2 to 123.4 while the average number of new suspect cases increased from 252.3 to 270.6.
+
+
+###Indications of TB-CARE's Progress during program implementation
+
+####Trend lines for TB CARE Provinces--NSSP cases prior to and during TB-CARE I 
+
+The following plot presents trend lines for NSSP cases by quarter for  the indicated time periods prior to and during the implementation of TB CARE I.  Although CB-DOTS has not produced a significantly higher number of NSSP cases, eight of the remaining 12 CB-DOTS provinces present a steeper trend during the TB-CARE time period.  Only two of the 12 CB-CARE provinces have turned from a positive trend to a negative or decreasing trend during the implementation of TB-CARE.
+
+```{r, echo = FALSE, warnings = FALSE}
+rtest <- ggplot(one, aes(sequence, NSSPcases)) 
+rtest <- rtest + geom_point(aes(colour = effect), size = 1)
+rtest <- rtest + geom_smooth(aes(group = effect), method = "lm")
+rtest <- rtest + facet_grid(effect ~ Province, margins = TRUE) # change "effect" to TRUE
+rtest <- rtest + ggtitle("Trend lines for NSSP cases by Province prior and during TB-CARE I")
+#rtest <- rtest + grid.text(Source: MSH/NTP)
+rtest <- rtest + theme_gray(base_size = 8)
+rtest <- rtest + xlab("Quarters from 2008 to 2014 2nd Quarter")
+rtest <- rtest + theme(legend.position="none") #guides(fill = FALSE)
+```
+
+```{r, echo=FALSE, fig.width=6.5, fig.height=7, fig.cap="Figure 5: NSSP by quarter prior to and after start of TB-CARE", message=FALSE, warnings = FALSE}
+rtest  
+```
+
+The following Figure presents box plots which give a clearer visual indication of province level performance in the identification of NSSP cases. 
+
+####Box Plots of the Average Quarterly NSSP cases by Province, before/after TB-CARE I
+
+```{r, echo=FALSE}
+par(oma=c(3,3,3,2))
+breaks <- c(100, 200, 300)
+pp <- ggplot(one, aes(x = Province, NSSPcases))# + theme_economist()
+pp <- pp + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "black", outlier.size = 2)
+pp <- pp + ggtitle("Average Quarterly NSSP cases
+                   by Province, before/after TB-CARE I")
+pp <- pp + annotate("text", label = "Source: Quarterly TB Reports
+                  Prior (2008 thru Qtr 2, 2011)
+                   TB-CARE (Qtr 3 2011 thru Qtr 2 2014)", 
+                    x = 2, y = 310, size = 2)
+pp <- pp + ylab("Average quarterly number of new Sputum Smear Positive cases of TB")
+pp <- pp + theme_gray(base_size = 10)
+pp <- pp + theme(legend.position= c(.8, .8)) #"bottom")
+pp <- pp + coord_flip()
+#fig.width =  7, fig.height = 6
+```
+
+```{r, echo=FALSE, fig.width =  6.5, fig.height = 6, fig.cap="Figure 6: Box Plots NSSP cases by province prior to and after the start of TB CARE"} 
+pp
+```
+
+Excluding Kabul, nine of TB-CAREs remaining 12 CB-DOTS provinces present a higher mean number of NSSP cases per quarter during TB-CARE.  It is interesting to observe that NSSP cases during TB-CARE in Kabul(URBAN-DOTS) show significant growth yet also starting at a higher level prior to TB CARE implementation.
+
+
+####Quarterly average of New suspect TB Cases by Province
+ 
+```{r, echo = FALSE}
+breaks <- c(100, 500, 1000)
+p <- ggplot(one, aes(x = Province, AllCases))
+p <- p + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "black",
+                      outlier.size = 2)
+p <- p + coord_trans(y = "log10")
+p <- p + coord_flip()
+p <- p + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+p <- p + ggtitle("Figure 5: Quarterly average ALL NEW TB Cases\n by Province before/after start of TB-CARE I")
+p <- p + ylab("log10 of average number of new cases of TB per province per Quarter")
+p <- p + annotate("text", label = "Source: Quarterly Provincial TB Reports
+                  Prior (Qtrs 2008 to Qtr 2, 2011 inclusive)
+                  TB-CARE (Qtr 3 2011 to Qtr 2 2014 inclusive)", x = 5.5, y = 75, size = 3)
+p <- p + theme_gray(base_size = 10)
+p <- p + theme(legend.position= c(.90, .85)) #"bottom")
+```
+
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height= 6.0, fig.cap="Figure 7: Box Plot of All cases by province prior to and after the start of TB CARE", warning=FALSE}
+p
+```
+
+Although the project wide growth in new suspect TB cases is not impressive, this chart documents an increase in the quarterly average in nine of TB CARE's 12 Community Based Dots provinces--excluding Kabul. This is the same observation as for the quarterly average number of NSSP cases before and after the implementation of TB-CARE.  Thee provinces (Paktiya, Kabul and Hirat) show evidence of significant improvement in their identification of new suspect TB Cases.  Only one province (Fayab) presents evidence of a possible decline in new suspect TB cases during TB CARE's implementation. 
+
+####Trend lines for TSR by Province prior to/after TB-CARE I start
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+rtest <- ggplot(one, aes(sequence, TSR))
+rtest <- rtest + geom_point(aes(colour = effect)) #, size = 1))  # added size
+rtest <- rtest + geom_smooth(aes(group = effect), method = "lm") # changed margnins = "effect" to TRUE
+rtest <- rtest + facet_grid(effect ~ Province, margins = "effect") # added free_y
+rtest <- rtest + ggtitle("Figure 6: Trend lines for Treatment Success Rates 
+                         by Province--prior to/after TB-CARE I start")
+rtest <- rtest + xlab("Quarters from 2008 to 2014 2nd Quarter")
+rtest <- rtest + ylab("Treatment Success Rates in TB CARE Provinces")
+rtest <- rtest + theme(legend.position="none") #guides(fill = FALSE)
+rtest <- rtest + theme_gray(base_size = 10)
+
+```
+
+This plot does not lend support to a conclusion that Treatment success rates have improved during the implementation of TB CARE.
+
+```{r, echo=FALSE, fig.width= 7.0, fig.height= 6.0, fig.cap="Figure 8: TSR Trend Lines by Province before and after the start of TB CARE", warning=FALSE, message=FALSE}
+rtest
+```
+
+Only Kabul (URBAN-DOTS) and Hirat appear to have a serious downward trend in their treatment success rates.  The cessation of WFP's nutrition support to TB patients may be related to the overall decrease in treatment success rates.
+
+####Average Quarterly Clinic Treatment Success Rates by Province, before/after TB-CARE
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+breaks <- c(50, 80, 90)
+pp <- ggplot(one, aes(x = Province, TSR))
+pp <- pp + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "red", outlier.size = 2)
+#pp <- pp + coord_trans(y = "log10")
+pp <- pp + scale_y_log10(breaks = breaks) #, labels = comma(breaks, digits = 1))
+pp <- pp + coord_flip()
+pp <- pp + ggtitle("Average Quarterly Clinic Treatment Success Rates
+                   by Province, before/after TB-CARE I")
+pp <- pp + annotate("text", label = "Source: Quarterly TB Reports
+                    Prior (2008--Qtr2, 2011)
+                    TB-CARE (Qtr3 2011--Qtr2 2014)", x = 4, y = 43, size = 3)
+pp <- pp + ylab("log10 of average quarterly clinic level Treatment Success Rates per province")
+pp <- pp + theme_gray(base_size = 10)
+pp <- pp + theme(legend.position= c(.10, .85)) #"bottom")
+
+```
+
+Although Kabul (URBAN-DOTS) has a downward trend in its Treatment Success Rate, its average rate during the implementation of TB CARE remains above the average levels achieved prior to TB CARE  
+```{r, echo=FALSE, fig.width= 6.5, fig.height= 6., fig.cap="Figure 9: Box plots of TSR by Province and for prior to and after the start of TB CARE", message=FALSE, warning=FALSE}
+pp
+```
+
+Again, although many provinces now have a downward statistical trend in their Treatment Success Rates, only one (Khost) shows evidence of a real decrease in this rate.  However, the indication in Figure 6 above of trends that are decreasing is cause for further study.  The wide range of reported quarterly rates (excess outliers denoted by the red dots) is of additional concern.  Security developments, drug outages or program management are suspect causes.
+
+####Average Clinic Quarterly Treatment Success Rates, before/after TB-CARE I
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+q <- ggplot(one, aes(effect, TSR))
+q <- q + geom_boxplot(fill = "gray80", colour ="#3366FF", notch = TRUE, outlier.colour = "red", outlier.size = 3) +
+  geom_jitter()
+q <- q + ggtitle("Average Clinic Quarterly Treatment Success Rates,
+                 before/after TB-CARE I")
+q <- q + annotate("text", label = "Source: Quarterly TB Reports
+                  Prior (2008 -- Qtr 2, 2011)
+                  TB-CARE (Qtr 3 2011 -- Qtr 2 2014)", x = 2, y = 45, size = 3)
+q <- q + ylab("Average Clinic quarterly Treatment Success Rates")
+q  <- q + xlab("All TB CARE reporting clinics, prior to and after the start of TBCARE I")
+q <- q + theme_gray(base_size = 10)
+```
+
+This highlights the improved consistency in the operation of TB clinics during the time period of TB CARE' implementation.  There has been a very significant reduction in the variability of TSRs and a slight increase in the overall treatment success rates for clinics in TB CARE supported provinces.  This improved consistency or reduced variability could be the result of improved security or better management and supervision. 
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height= 6.0, fig.cap="Figure 10: Box Plot of TSR  for only TB CARE provinces prior to and after the start of TB CARE", warning=FALSE,message=FALSE}
+q
+```
+
+Although as previously noted, TB CARE clinics demonstrate a recent decreasing trend in their Treatment Success Rates, the overall trend is clearly improved operations with reduced variability and a continuing slight increase in the overall average Treatment Success Rate.
+
+##Case Findings and NSSP Cases by Gender and Age Groups
+
+###Figure 11: All Provinces Per Clinic Average number of male and female New Sputum Smear Positive Patients Quarter 2, 2014
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+detach(one)
+attach(three)
+meansbyage <- cbind(mf, agegroups)
+mmeansbyage <- melt(meansbyage)
+#mmeansbyage# now a long table
+# FIGURE nine  ##############################
+
+tx <- ggplot(mmeansbyage, aes(x = agegroups, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge()) # Now in the correct order
+tx <- tx + xlab("Age Groups") + ylab("Mean Number of NSSP Patients per Clinic per Quarter")
+tx <- tx + ggtitle("All Provinces Per Clinic Average number of male and female
+                   New Sputum Smear Positive Patients Quarter 2, 2014")
+tx <- tx + annotate("text", label = "Source: Quarterly TB Reports
+                    ALL reporting TB clinics in Afghanistan
+                    Quarter 2, 2014", x = 6, y = .9, size = 3)
+tx <- tx + theme_gray(base_size = 12)
+tx <- tx + theme(legend.position= c(.10, .85)) #"bottom")
+```
+
+All Provinces distribution of Male and Female patients. 
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height= 6.0, fig.cap="Figure 11: All Provinces, Males and Females", warning=FALSE,message=FALSE}
+tx
+```
+
+Notes on the above and also VERIFY Figures 11, 12 and 13.
+
+###Figure 12 TB-CARE Provinces ONLY--average number of male and female New Sputum Smear Positive Patients 2nd Quarter (Only for Selected Clinic Types--BHC, CHC, and District Hospitals.)
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+#  need to split by TBCAREyn                         NO                YES
+#Basic Health Center (BHC)                            123               94
+#Comprehensive Health Center (CHC)                    167              205
+#District Hospital (H3)                                27               31
+#  Look at the distribution of mean cases by age for these clinics by TBCAREyn
+# end test
+BHCetc <- c("Basic Health Center (BHC)", "Comprehensive Health Center (CHC)", "District Hospital (H3)")
+BHCs <- subset(three, FacilityType == "Basic Health Center (BHC)")
+#head(BHCs)
+CHCs <- subset(three, FacilityType == "Comprehensive Health Center (CHC)")
+#head(CHCs)
+DHospitalH3 <- subset(three, FacilityType == "District Hospital (H3)")
+#head(DHospitalH3)
+temp <- rbind(BHCs, CHCs)
+clinics <- rbind(temp, DHospitalH3)
+#  set up code
+testfn = function(x) c(mean=mean(x, na.rm = TRUE))  # repeat
+agegroups <- c("Age 0_4", "5_14","15_24","25_34","35_44","45_54","55_64","65up") # repeat
+agegroups <- factor(agegroups, levels = c("Age 0_4", "5_14","15_24","25_34","35_44","45_54","55_64","65up"),
+                    ordered = TRUE) # repeat
+#
+# using testfn  DO SEPERATELY FOR TBCAREyn 
+clinicsy <- subset(clinics, TBCAREyn == "TB_CARE")
+clinicsn <- subset(clinics, TBCAREyn == "Not_TB_CARE")
+# for TBCARE provinces
+TBCAREmales = apply(clinicsy[c(7, 9, 11, 13, 15, 17, 19, 21)], 2, testfn) # this works
+TBCAREfemales = apply(clinicsy[c(8, 10, 12, 14, 16, 18, 20, 22)],2, testfn)
+#
+TBCAREfemales <- as.data.frame(TBCAREfemales)
+TBCAREmales <- as.data.frame(TBCAREmales)
+mfy <- cbind(TBCAREmales, TBCAREfemales)
+meansbyagey <- cbind(mfy, agegroups)
+#mmeansbyagey
+mmeansbyagey <- melt(meansbyagey)
+#mmeansbyagey# now a long table
+
+tx <- ggplot(mmeansbyagey, aes(x = agegroups, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge()) # Now in the correct order
+tx <- tx + xlab("Age Groups") + ylab("Per Clinic Mean Number of NSSP cases per Quarter")
+tx <- tx + ggtitle("TB-CARE Provinces ONLY--average number of male and female
+                   New Sputum Smear Positive Patients 2nd Quarter 2014")
+tx <- tx + theme_gray(base_size = 10)
+tx <- tx + theme(legend.position= c(.85, .85)) #"bottom")
+tt <- tx + annotate("text", label = "NSSP MALES ONLY attending 
+                                         Basic Health Centers,
+                                     Comprehensive Health Centers,
+                                     and District Hospitals ONLY",
+                                       x = 6, y = .7, size = 3)
+```
+
+
+notes here
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height= 6.0, fig.cap="Figure 12: Per Clinic Mean Number of new male and female patients per Quarter TB CARE Clinics Only", warning=FALSE,message=FALSE}
+tx
+```
+
+notes here
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+# now for non TBCARE provinces
+noTBCAREmales = apply(clinicsy[c(7, 9, 11, 13, 15, 17, 19, 21)], 2, testfn)
+noTBCAREfemales = apply(clinicsn[c(8, 10, 12, 14, 16, 18, 20, 22)],2, testfn)
+#
+noTBCAREfemales <- as.data.frame(noTBCAREfemales)
+noTBCAREmales <- as.data.frame(noTBCAREmales)
+mfn <- cbind(noTBCAREmales, noTBCAREfemales)
+meansbyagen <- cbind(mfn, agegroups)
+#meansbyagen
+mmeansbyagen <- melt(meansbyagen)
+#mmeansbyagen# now a long table
+```
+
+Some notes  below is what we want.
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE}
+ttx <- ggplot(mmeansbyagen, aes(x = agegroups, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = position_dodge()) # Now in the correct order
+ttx <-ttx + xlab("Age Groups") + ylab("Mean Number of NSSP Patients per Quarter")
+ttx <- ttx + ggtitle("non-TB CARE provinces--average male New Sputum Smear Positive Patients
+                     2nd Quarter 2014")
+ttx <- ttx + annotate("text", label = "NSSP MALES ONLY attending 
+                                         Basic Health Centers,
+                                     Comprehensive Health Centers,
+                                     and District Hospitals ONLY",
+                                       x = 6, y = .7, size = 3)
+ttx <- ttx + theme_gray(base_size = 10)
+ttx <- ttx + theme(legend.position= c(.15, .85)) #"bottom")
+```
+
+Some notes   May have to include more code from THREE on maleyn, etc
+
+```{r, echo=FALSE, fig.width= 6.5, fig.height= 6.5, fig.cap="Figure 13 Non-TB CARE Province Male and Female NSSP cases", message=FALSE,warning=FALSE}
+ttx
+```
+
+Some notes after figure 13
+ttx
+
+#END

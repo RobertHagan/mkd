@@ -1,0 +1,177 @@
+---
+title: "testarea"
+author: "Robert Hagan"
+date: "Wednesday, December 03, 2014"
+output: word_document
+---
+
+# FROM http://docs.ggplot2.org/0.9.3.1/geom_point.html
+#  First for URBAN DOTS.. Kabul only
+#ggsave(plot = cbtest, file = "TB-CARE_effect_Of_CB_DOTS.png", units = "in", width = 6.5, height = 6.5)
+# 
+# This one is good.. USE This
+# now for facit grid for each province
+#test <- ggplot(one, aes(sequence, NSSPcases))
+#test <- test + geom_point(aes(colour = effect))
+#test <- test + facet_grid(effect ~ Province, margins = "effect")
+#test  #  Good for id title and labels.
+#ggsave(plot = test, file = "NSSPcases_in_Provinces-by-effect-and-total.png", units = "in", width = 6.5, height = 6.5)
+#
+# TEst various boundries
+#par(oma=c(3,3,3,3))  # all sides have 3 lines of space
+#par(omi=c(1,1,1,1)) # alternative, uncomment this and comment the previous line to try 
+# - The default size is c(5,4,4,2) + 0.1, (equivalent to c(5.1,4.1,4.1,2.1))
+#
+# FIGURE ONE WITH regression lines http://docs.ggplot2.org/0.9.3.1/geom_abline.html
+# ABOVE IS Good.  
+#ggsave(plot = rtest, file = "F1TrendLines_NSSP_For_Provinces-by-effect-and-total.pdf",
+#       units = "in", width = 9.5, height = 6.5)
+#ggsave(plot = rtest, file = "F1TrendLinesNSSP_For_Provinces-by-effect-and-total.png",
+#       units = "in", width = 6.5, height = 6.5)
+#
+#ggsave(plot = rtest,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F1TrendLines_NSSP_For_Provinces-by-effect-and-total.pdf",
+#       units = "in", width = 9.5, height = 6.5)
+#ggsave(plot = rtest,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F1TrendLines_NSSP_For_Provinces-by-effect-and-total.png",
+#       units = "in", width = 6.5, height = 6.5)
+#  USE IN THE FINAL REPORT
+
+
+
+# by Province and effect for NSSPcases  Make log for NSSP cases
+
+#  This is super.. Add labels and use. 
+#ggsave(plot = pp,
+#    file = "D:/TB_Evaluation/DataWorkArea/figures/F1Boxplot_Avg_Qtr_NSSP_cases_by_Province_PRIOR_and_DURING_TB#-CARE_I.png",
+#    units = "in", width = 6.5, height = 6.5)
+#ggsave(plot = pp,
+#    file = "D:/TB_Evaluation/DataWorkArea/figures/F2Boxplot_Avg_Qtr_NSSP_cases_by_Province_PRIOR_and_during_TB#-CARE_I.pdf",
+#       units = "in", width = 9.5, height = 6.5)
+#
+# 
+
+#  Below works well.  USE this one.
+ 
+#ggsave(plot = p, file = "F3LOG_Quarterly_average_ALLCases_by_Province_before_after_TB-CARE_I.png",
+#       units = "in", width = 6.5, height = 6.5)
+#ggsave(plot = p, file = "F3LOG_Quarterly_average_ALLCases_by_Province_before_after_TB-CARE_I.pdf",
+#       units = "in", width = 9.0, height = 6.5)
+#ggsave(plot = p,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F3LOG_Quarterly_average_ALLCases_by_Province_before_after_#TB-CARE_I.png",
+#       units = "in", width = 6.5, height = 6.5)
+#ggsave(plot = p,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F3LOG_Quarterly_average_ALLCases_by_Province_before_after_#TB-CARE_I.pdf",
+#       units = "in", width = 9.0, height = 6.5)
+
+############################### END three######################################
+# FIGURE FOUR START
+#test <- test + facet_grid(effect ~ Province, space = "free_y")  margines use to be "effect"
+# Try to add regression lines http://docs.ggplot2.org/0.9.3.1/geom_abline.html
+# ABOVE IS Good.  FIGURE 4
+#ggsave(plot = rtest, file = "F4TrendLines_TSR_For_Provinces-by-effect-and-total.pdf",
+#       units = "in", width = 9.5, height = 6.5)
+#ggsave(plot = rtest, file = "F4TrendLines_TSR_For_Provinces-by-effect-and-total.png",
+#       units = "in", width = 6.5, height = 6.5)
+#ggsave(plot = rtest,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F4TrendLines_TSR_For_Provinces-by-effect-and-total.pdf",
+#       units = "in", width = 9.5, height = 6.5)
+#ggsave(plot = rtest,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F4TrendLines_TSR_For_Provinces-by-effect-and-total.png",
+#       units = "in", width = 6.5, height = 6.5)
+#
+#
+################## END four
+# FIGURE 5
+# http://docs.ggplot2.org/0.9.3.1/geom_boxplot.html
+# USE THIS PLOT TO DEMONSTRATE AN INCREASE IN TSR AND REDUCTION IN OUTLIERS.. 
+# NOTE THAT EVEN OUTLIERS AFTER TBCARE ARE ABOVE 70%
+
+#  USE THIS
+# good .. maybe use  PUT LABELS AND TEXT FOR DETAILS AND TITLE AND SAVE.
+#ggsave(plot = q, file = "F5Clinic_Avg_Qtr_TSR_for_All_before_and_after_TB-CARE_I.png",
+#       units = "in", width = 6.5, height = 6.5)
+#ggsave(plot = q, file = "F5Clinic_Avg_Qtr_TSR_for_all_before_and_after_TB-CARE_I.pdf",
+#       units = "in", width = 9, height = 6.5)
+#ggsave(plot = q,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F5Clinic_Avg_Qtr_TSR_for_All_before_and_after_TB-CARE_I#.png",
+#       units = "in", width = 6.5, height = 6.5)
+#ggsave(plot = q,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F5Clinic_Avg_Qtr_TSR_for_all_before_and_after_TB-CARE_I#.pdf",
+#       units = "in", width = 9, height = 6.5)
+
+#############  end FIGURE FIVE ##########################
+#
+# Figure six
+#  This is super.. Add labels and use. check to see if it looks ok without logs
+#ggsave(plot = pp, file = "F6Log_Boxplot_Avg_Qtr_TSR_by_Province_before_and_after_TB-CARE_I.png",
+#       units = "in", width = 7.5, height = 6.5)
+#ggsave(plot = pp, file = "F6Log_Boxplot_Avg_Qtr_TSR_by_Province_before_and_after_TB-CARE_I.pdf",
+#       units = "in", width = 9, height = 6.5)
+#ggsave(plot = pp,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F6Log_Boxplot_Avg_Qtr_TSR_by_Province_before_and_after_TB#-CARE_I.png",
+#       units = "in", width = 7.5, height = 6.5)
+#ggsave(plot = pp,
+#       file = "D:/TB_Evaluation/DataWorkArea/figures/F6Log_Boxplot_Avg_Qtr_TSR_by_Province_before_and_after_TB#-CARE_I.pdf",
+#       units = "in", width = 9, height = 6.5)
+#
+########################### end six ###############################
+
+
+#freqNSSP <- ggplot(one, aes(NSSPcases, stat = "identity")) + geom_freqpoly(binwidth = 20) + facet_wrap(~effect)
+#freqNSSP # line distribution only for prior and TB cafre
+#histogramNSSP <- ggplot(one, aes(NSSPcases, stat = "identity")) + geom_histogram(binwidth = 20) + facet_wrap(~effect)
+#histogramNSSP # Nice Histogram of total 
+
+##########
+#######
+#####
+# USE BELOW ONLY IF NEDED
+# regression line for all
+# create a function then repeat for each province and the total.. 
+# for Allcases, NSSPcases and TSR
+#
+# ALSO CHECK FOR IMPROVEMENTS SINCE THE PROJECT BEGAN.. I.E. INCREASES
+# MAY HAVE TO TRANSFORM THE DATA.
+
+# make plots below for the two effects.. to see if there is a trend in either.
+#  Start HERE
+
+```
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+summary(cars)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Thisis nice
+par(oma=c(5,4,4,2))
+breaks <- c(100, 200, 300)
+pp <- ggplot(one, aes(x = Province, NSSPcases)) + theme_economist()
+pp <- pp + theme(legend.position="bottom")
+pp <- pp + geom_boxplot(aes(fill = factor(effect)), outlier.colour = "black", outlier.size = 2)
+pp <- pp + coord_flip()
+pp <- pp + ggtitle("Figure 2: Average Quarterly NSSP cases by Province, before/after TB-CARE I")
+pp <- pp + grid.text("Source: ssssss sssssssss sssssssss", x = unit(.02, "npc"),
+                     y = unit(.01, "npc"), just = c("left","bottom"),
+                     gp = gpar(fontface = "italic", fontsize = 12, col = "black""))
+#pp <- pp + annotate("text", label = "Source: Quarterly TB Reports
+ #                  Prior (2008 thru Qtr 2, 2011)
+#                   TB-CARE (Qtr 3 2011 thru Qtr 2 2014)", x = 2, y = 310)
+pp <- pp + ylab("Average quarterly number of new Sputum Smear Positive cases of TB")
+pp <- pp + coord_flip()
+```
+```{r, echo=TRUE}
+pp
+```
